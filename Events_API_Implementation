@@ -1,0 +1,39 @@
+const axios = require('axios');
+
+var time = new Date()
+
+axios.post('https://logx.optimizely.com/v1/events', {
+  "account_id": "XXXXXXXXXX", // Input Account ID.
+  "visitors": [ //It's possible to send multiple visitor objects in a single payload. Up to 10MB.
+    {
+      "snapshots": [{
+        "decisions": [{
+          "campaign_id": "XXXXXXXXXX", // These values are populated by the client-side APIs.
+          "experiment_id": "XXXXXXXXXX",
+          "variation_id": "XXXXXXXXX"
+        }], // The decisions array can be empty with session_id set to "AUTO". This assumes that this event is sent within 30 minutes of the last "stateful" event.
+        "events": [{
+            "entity_id": "XXXXXXX", //This is is the campaign ID
+            "type": "campaign_activated", // Dont change
+            "timestamp": time.getTime() - 1000, // Required: This needs to reflect a time before the conversion event
+            "uuid": "be4554a4-d360-442e-936d-80d63cf17260" //Must be unique
+          },
+          {
+            "timestamp": time.getTime(), // Required: Epoch timestamp in milliseconds.
+            "uuid": "12345-67890", // Use any UUID generation library. Used to de-dupe events on Optimizely's backend should multiple be sent.
+            "entity_id": "XXXXXXXXXX", // ID of custom event, retrieved from Optimizely's interface.
+            //"value": 3, // This is the incremental LTV value that you would pass to Optimizely. It can be negative to decrement.
+            "type": "custom" // Don't change this.
+          }
+        ]
+      }],
+      "visitor_id": "XXXXXXXX", // This is the optimizelyEndUserId.
+      "attributes": [], // This can be an empty array if you don't care about segmentation for server-side events.
+      "session_id": "AUTO" // Don't change this. session_id must be set to "AUTO" for stateless attribution to work.
+    }
+  ],
+  "client_name": "optly/squareTracker", // Don't change this.
+  "project_id": "XXXXXXXXXX" // Your Project ID
+}).then(response => {
+  console.log("SUCCESS, CHECK YOUR RESULTS NOW")
+}).catch(error => console.log(error))
